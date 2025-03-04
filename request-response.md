@@ -183,7 +183,5 @@ Asynchronous API calls should be used when:
 | `409 Conflict` | Resource conflict (e.g., duplicate email) |
 | `500 Internal Server Error` | Unexpected server error |
 
----
 
-Would you like any modifications or additions to this document? 🚀
 
