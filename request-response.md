@@ -1,4 +1,4 @@
-# Request and Response Structure of RESTful API (Grocery Example)
+# Request and Response Structure of RESTful API (Hyperlocal Grocery Example)
 
 A well-structured RESTful API ensures consistency, scalability, and ease of use. Below are the best practices for designing request and response structures in a hyperlocal grocery API.
 
@@ -145,11 +145,66 @@ Use meaningful status codes and detailed error messages.
 
 ---
 
-## **3. Status Codes and Their Meaning**
+## **3. Asynchronous API Calls**
+### **3.1 When to Use Asynchronous APIs**
+Asynchronous API calls should be used when:
+- **Long-running processes** (e.g., order processing, bulk data uploads, background tasks).
+- **Real-time updates** (e.g., notifications, order tracking, stock updates).
+- **Third-party integrations** where response times may vary.
+- **Avoiding blocking UI or backend** to ensure responsiveness.
+
+### **3.2 Asynchronous Request-Response Pattern**
+#### **Step 1: Client Makes a Request (POST /orders)**
+```json
+{
+  "user_id": 123,
+  "items": [
+    { "product_id": 567, "quantity": 2 }
+  ]
+}
+```
+#### **Step 2: API Responds Immediately with a Processing Status**
+```json
+{
+  "status": 202,
+  "success": true,
+  "message": "Order is being processed",
+  "task_id": "xyz-123"
+}
+```
+#### **Step 3: Client Polls for Task Status (GET /tasks/xyz-123)**
+```json
+{
+  "status": 200,
+  "success": true,
+  "message": "Order processed successfully",
+  "data": {
+    "order_id": 101,
+    "status": "Delivered"
+  }
+}
+```
+
+### **3.3 Webhook-Based Asynchronous Processing**
+For efficient async processing, APIs can use webhooks to notify clients when tasks are completed instead of polling.
+
+#### **Webhook Payload Example**
+```json
+{
+  "event": "order.completed",
+  "order_id": 101,
+  "status": "Delivered"
+}
+```
+
+---
+
+## **4. Status Codes and Their Meaning**
 | Status Code | Meaning |
 |-------------|------------------------------------------------|
 | `200 OK` | Successful GET request |
 | `201 Created` | Resource successfully created (POST) |
+| `202 Accepted` | Request accepted for asynchronous processing |
 | `204 No Content` | Successful request with no response body |
 | `400 Bad Request` | Client-side input validation error |
 | `401 Unauthorized` | Authentication failed or missing token |
@@ -157,15 +212,6 @@ Use meaningful status codes and detailed error messages.
 | `404 Not Found` | Requested resource does not exist |
 | `409 Conflict` | Resource conflict (e.g., duplicate email) |
 | `500 Internal Server Error` | Unexpected server error |
-
----
-
-## **4. Best Practices**
-✅ Use **consistent response format** across all endpoints.  
-✅ Always include **status, success flag, message, and errors** fields.  
-✅ Use **appropriate status codes** to indicate success or failure.  
-✅ Provide **detailed error messages** to help clients debug issues.  
-✅ Support **pagination and filtering** for large datasets.  
 
 
 
