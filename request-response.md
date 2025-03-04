@@ -22,10 +22,12 @@ Common headers for RESTful APIs:
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer <token>
+X-Correlation-ID: <unique-id>
 ```
 - `Content-Type`: Specifies the request body format (usually `application/json`).
 - `Accept`: Defines the expected response format.
 - `Authorization`: Includes authentication credentials (JWT, API key, etc.).
+- `X-Correlation-ID`: A unique identifier for tracing API requests across services and logs.
 
 ### **1.3 Request Body**
 Use a structured JSON object for `POST`, `PUT`, and `PATCH` requests.
@@ -70,9 +72,11 @@ A consistent JSON response format helps maintain clarity across all endpoints.
   "message": "Request was successful",
   "data": {},
   "meta": {},
-  "errors": []
+  "errors": [],
+  "correlation_id": "<same-x-correlation-id>"
 }
 ```
+- `correlation_id`: The same value sent in `X-Correlation-ID` to enable tracing of the request-response cycle.
 
 ### **2.2 Success Response Examples**
 #### **Single Resource (GET /products/567)**
@@ -88,7 +92,8 @@ A consistent JSON response format helps maintain clarity across all endpoints.
     "price": 2.5,
     "availability": "In Stock"
   },
-  "errors": []
+  "errors": [],
+  "correlation_id": "abc-123"
 }
 ```
 
@@ -109,7 +114,8 @@ A consistent JSON response format helps maintain clarity across all endpoints.
     "total_pages": 10,
     "has_next": true
   },
-  "errors": []
+  "errors": [],
+  "correlation_id": "xyz-789"
 }
 ```
 
@@ -125,21 +131,8 @@ Use meaningful status codes and detailed error messages.
   "success": false,
   "message": "Product not found",
   "data": null,
-  "errors": []
-}
-```
-
-#### **Example Validation Error Response (400 Bad Request - Order Validation Error)**
-```json
-{
-  "status": 400,
-  "success": false,
-  "message": "Validation Error",
-  "data": null,
-  "errors": [
-    { "field": "delivery_address", "message": "Address is required" },
-    { "field": "items", "message": "At least one item must be included in the order" }
-  ]
+  "errors": [],
+  "correlation_id": "def-456"
 }
 ```
 
@@ -169,31 +162,8 @@ Asynchronous API calls should be used when:
   "status": 202,
   "success": true,
   "message": "Order is being processed",
-  "task_id": "xyz-123"
-}
-```
-#### **Step 3: Client Polls for Task Status (GET /tasks/xyz-123)**
-```json
-{
-  "status": 200,
-  "success": true,
-  "message": "Order processed successfully",
-  "data": {
-    "order_id": 101,
-    "status": "Delivered"
-  }
-}
-```
-
-### **3.3 Webhook-Based Asynchronous Processing**
-For efficient async processing, APIs can use webhooks to notify clients when tasks are completed instead of polling.
-
-#### **Webhook Payload Example**
-```json
-{
-  "event": "order.completed",
-  "order_id": 101,
-  "status": "Delivered"
+  "task_id": "xyz-123",
+  "correlation_id": "task-123"
 }
 ```
 
